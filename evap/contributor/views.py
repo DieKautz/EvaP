@@ -96,6 +96,7 @@ def index(request):
     semester_list = [
         {
             "semester_name": semester.name,
+            "short_name": semester.short_name,
             "id": semester.id,
             "is_active": semester.is_active,
             "evaluations": [
@@ -105,8 +106,13 @@ def index(request):
         for semester in semesters
     ]
 
+    degrees = Degree.objects.filter(courses__evaluations__in=displayed_evaluations).distinct()
+    course_types = CourseType.objects.filter(courses__evaluations__in=displayed_evaluations).distinct()
+
     template_data = {
         "semester_list": semester_list,
+        "degrees": degrees,
+        "course_types": course_types,
         "show_delegated": show_delegated,
         "delegate_selection_form": DelegateSelectionForm(),
     }

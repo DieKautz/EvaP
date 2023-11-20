@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
+{% load static %}
 {% load infotext_templatetags %}
 {% load results_templatetags %}
 {% load evaluation_filters %}
@@ -34,6 +35,63 @@
             </div>
         {% endif %}
 
+    </div>
+
+
+    <div class="card mb-1">
+        <div class="card-body">
+            <h5 class="card-title">
+                {% trans 'Filter' %}
+                <span class="reset-button float-end" data-reset="filter">
+                    <span class="fas fa-eraser"></span>
+                    {% trans 'Clear all filters' %}
+                </span>
+            </h5>
+            <div class="row">
+                <div class="col-12 col-lg">
+                    <input type="search" name="search" class="form-control mb-3" placeholder="{% trans 'Search...' %}" />
+                </div>
+                <div class="col-6 col-sm-4 col-md">
+                    <h6 class="card-subtitle mb-1">{% trans 'Degrees' %}</h6>
+                    <div id="degree-select" class="result-filter-list">
+                        {% for degree in degrees %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{ degree.id }}" data-filter="{{ degree.name }}" name="degree" id="degree-{{ degree.id }}" />
+                                <label class="form-check-label w-100" for="degree-{{ degree.id }}">
+                                    {{ degree.name }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-6 col-sm-4 col-md">
+                    <h6 class="card-subtitle mb-1">{% trans 'Course types' %}</h6>
+                    <div id="course-type-select" class="result-filter-list">
+                        {% for course_type in course_types %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{ course_type.id }}" data-filter="{{ course_type.name }}" name="courseType" id="courseType-{{ course_type.id }}" />
+                                <label class="form-check-label w-100" for="courseType-{{ course_type.id }}">
+                                    {{ course_type.name }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-sm-4 col-md">
+                    <h6 class="card-subtitle mb-1">{% trans 'Semester' %}</h6>
+                    <div id="semester-select" class="result-filter-list">
+                        {% for semester in semester_list %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{ semester.id }}" data-filter="{{ semester.short_name }}" name="semester" id="semester-{{ semester.id }}" />
+                                <label class="form-check-label w-100" for="semester-{{ semester.id }}">
+                                    {{ semester.semester_name }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     {% for semester in semester_list %}
@@ -244,4 +302,35 @@
             }
         </script>
     {% endwith %}
+{% endblock %}
+
+{% block additional_javascript %}
+    <script type="module">
+        import {ResultGrid} from "{% static 'js/datagrid.js' %}";
+
+        new ResultGrid({
+            storageKey: "results-data-grid",
+            head: document.querySelector(".grid-header"),
+            container: document.querySelector("#results-grid"),
+            searchInput: document.querySelector("input[name=search]"),
+            filterCheckboxes: new Map([
+                ["semester", {
+                    checkboxes: [...document.querySelectorAll("input[name=semester]")],
+                    selector: "[data-col=semester]",
+                }],
+                ["degree", {
+                    checkboxes: [...document.querySelectorAll("input[name=degree]")],
+                    selector: ".badge-degree",
+                }],
+                ["courseType", {
+                    checkboxes: [...document.querySelectorAll("input[name=courseType]")],
+                    selector: ".badge-course-type",
+                }],
+            ]),
+            sortColumnSelect: document.querySelector("[name=result-sort-column]"),
+            sortOrderCheckboxes: [...document.querySelectorAll("[name=result-sort-order]")],
+            resetFilter: document.querySelector("[data-reset=filter]"),
+            resetOrder: document.querySelector("[data-reset=order]"),
+        }).init();
+    </script>
 {% endblock %}
